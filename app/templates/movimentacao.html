@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from 'macros.html' import tokens,bancos_select,rateios with context %}
+{% block content %}<p class="eyebrow">CAIXA</p><h1>Nova movimentação</h1><p class="text-secondary">Registre valores efetivamente recebidos ou pagos. Compras no cartão têm um formulário próprio.</p>
+<form method="post" class="panel form-panel">{{ tokens() }}
+<div class="row g-3"><div class="col-md-6"><label class="form-label">Operação<select class="form-select" name="tipo" id="tipo"><option value="saida">Saída / despesa</option><option value="entrada">Entrada / receita</option><option value="transferencia">Transferência entre contas</option><option value="abertura">Saldo inicial positivo</option></select></label></div><div class="col-md-6"><label class="form-label">Data<input class="form-control" type="date" name="data" value="{{ today }}" required></label></div>
+<div class="col-md-8"><label class="form-label">Descrição<input class="form-control" name="descricao" required maxlength="200" placeholder="Ex.: Supermercado"></label></div><div class="col-md-4"><label class="form-label">Valor (R$)<input class="form-control" name="valor" inputmode="decimal" placeholder="150,00" required></label></div>
+<div class="col-md-6"><label class="form-label">Conta do recebimento ou pagamento{{ bancos_select(bancos,'origem') }}</label></div>
+<div class="col-md-6" data-tipos="entrada saida"><label class="form-label">Categoria<select class="form-select" name="categoria"><option value="">Selecione</option>{% for c in categorias %}<option value="{{ c.id }}" data-categoria="{{ c.tipo }}">{{ c.nome }} ({{ c.tipo }})</option>{% endfor %}</select></label></div>
+<div class="col-md-6" data-tipos="transferencia"><label class="form-label">Conta de destino{{ bancos_select(bancos,'destino') }}</label></div></div>
+<div data-tipos="saida">{{ rateios(pessoas) }}</div>
+<p class="text-secondary mt-3" data-tipos="abertura">Informe o saldo existente antes de começar a usar o sistema. Ele será registrado no patrimônio, sem gerar receita.</p>
+<button class="btn btn-primary mt-4">Confirmar movimentação</button></form>{% endblock %}

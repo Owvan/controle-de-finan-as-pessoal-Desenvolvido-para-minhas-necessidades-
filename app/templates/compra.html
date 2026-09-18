@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from 'macros.html' import tokens,rateios with context %}
+{% block content %}<p class="eyebrow">CARTÕES</p><h1>Compra no cartão</h1><p class="text-secondary">O gasto é reconhecido na compra. As parcelas distribuem a cobrança entre faturas.</p>
+<form method="post" class="panel form-panel">{{ tokens() }}<div class="row g-3">
+<div class="col-md-6"><label class="form-label">Cartão<select class="form-select" name="cartao" required><option value="">Selecione</option>{% for c in cartoes %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></label></div><div class="col-md-6"><label class="form-label">Data da compra<input class="form-control" name="data" type="date" value="{{ today }}" required></label></div>
+<div class="col-md-8"><label class="form-label">Descrição<input class="form-control" name="descricao" required maxlength="200"></label></div><div class="col-md-4"><label class="form-label">Valor total (R$)<input class="form-control" name="valor" required inputmode="decimal" placeholder="300,00"></label></div>
+<div class="col-md-4"><label class="form-label">Categoria da sua parte<select class="form-select" name="categoria"><option value="">Selecione</option>{% for c in categorias if c.tipo=='despesa' %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></label></div>
+<div class="col-md-4"><label class="form-label">Número de parcelas<input class="form-control" name="quantidade" type="number" min="1" max="120" value="1" required></label></div>
+<div class="col-md-4"><label class="form-label">Mês de fechamento da 1ª fatura<input class="form-control" name="competencia" type="month" value="{{ today[:7] }}" required></label></div></div>
+<p class="text-secondary mt-2">Confira o mês com o banco. Dias 29–31 são ajustados ao último dia do mês quando necessário. Centavos restantes ficam nas primeiras parcelas.</p>
+{{ rateios(pessoas) }}<button class="btn btn-primary mt-4">Registrar compra</button></form>{% endblock %}

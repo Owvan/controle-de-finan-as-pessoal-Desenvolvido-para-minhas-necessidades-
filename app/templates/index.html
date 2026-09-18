@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">SEU DINHEIRO, COM CLAREZA</p><h1>Visão geral</h1><p class="text-secondary">Acompanhe o caixa, os cartões e os valores de terceiros.</p></div><div class="actions"><a class="btn btn-primary" href="{{ url_for('main.nova_movimentacao') }}">+ Movimentação</a><a class="btn btn-outline-primary" href="{{ url_for('main.nova_compra') }}">Compra no cartão</a></div></div>
+<div class="row g-3 mb-4">
+{% for label,value,help in [('Disponível em caixa',caixa,'Contas bancárias e carteira'),('Cartões a pagar',divida,'Inclui parcelas futuras'),('A receber de terceiros',a_receber,'Gastos ainda não reembolsados')] %}
+<div class="col-md-4"><section class="metric"><span>{{ label }}</span><strong>{{ value|brl }}</strong><small>{{ help }}</small></section></div>
+{% endfor %}</div>
+<div class="row g-4"><div class="col-lg-5"><section class="panel"><h2 class="h5">Minhas contas</h2>{% for c in bancos %}<div class="account-row"><a href="{{ url_for('main.extrato',conta=c.id) }}">{{ c.nome }}</a><strong>{{ c.saldo|brl }}</strong></div>{% else %}<p class="text-secondary">Comece cadastrando uma conta bancária ou carteira.</p><a href="{{ url_for('main.cadastros') }}">Criar primeira conta →</a>{% endfor %}</section></div>
+<div class="col-lg-7"><section class="panel"><h2 class="h5">Últimos registros</h2>{% for l in recentes %}<div class="account-row"><div><a href="{{ url_for('main.lancamento',id_=l.id) }}">{{ l.descricao }}</a><small class="d-block text-secondary">{{ l.data_lancamento }} · {{ l.tipo|replace('_',' ') }}</small></div><span>#{{ l.id }}</span></div>{% else %}<p class="text-secondary mb-0">Seus registros aparecerão aqui. Cadastre as contas e informe seus saldos iniciais.</p>{% endfor %}</section></div></div>
+{% endblock %}
