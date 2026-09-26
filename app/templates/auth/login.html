@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% from 'macros.html' import tokens with context %}
+{% block title %}Entrar{% endblock %}
+{% block content %}<section class="panel auth-card"><div class="auth-icon" aria-hidden="true">MC</div><h1 class="h3 text-center">Acessar conta</h1><p class="text-secondary text-center">Seu caixa, cartões e gastos em um só lugar.</p>
+<form method="post">{{ tokens() }}<label class="form-label">Usuário ou e-mail<input class="form-control" name="identifier" required maxlength="254" autocomplete="username" autofocus value="{{ request.form.get('identifier','') }}"></label><label class="form-label">Senha<input class="form-control" name="password" type="password" required maxlength="128" autocomplete="current-password"></label><button class="btn btn-primary w-100 mt-3">Entrar</button></form><p class="text-secondary small mt-4 mb-0">Precisa de acesso ou esqueceu a senha? Solicite ao administrador do caixa.</p></section>{% endblock %}

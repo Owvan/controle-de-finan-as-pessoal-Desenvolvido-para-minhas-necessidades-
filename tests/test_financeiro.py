@@ -26,6 +26,11 @@ class FinanceiroTest(unittest.TestCase):
         self.income = self.db.execute("SELECT id FROM contas WHERE nome='Salário'").fetchone()[0]
         self.app = create_app({'TESTING': True, 'DATABASE': str(self.path), 'SECRET_KEY': 'test-only'})
         self.client = self.app.test_client()
+        from app.auth.services import criar_usuario
+        user_id = criar_usuario(self.db, 'Teste Admin', 'teste_admin', 'teste@example.com', 'senha-de-teste-segura', primeiro=True)
+        with self.client.session_transaction() as session:
+            session['user_id'] = user_id
+            session['session_version'] = 1
 
     def tearDown(self):
         self.db.close()
@@ -188,7 +193,7 @@ class FinanceiroTest(unittest.TestCase):
 
     def test_migracao_repetivel_e_recusa_legado(self):
         criar_database(self.path)
-        self.assertEqual(self.db.execute('PRAGMA user_version').fetchone()[0], 1)
+        self.assertEqual(self.db.execute('PRAGMA user_version').fetchone()[0], 2)
         old = self.tmp / 'antigo.db'
         con = sqlite3.connect(old)
         con.execute('CREATE TABLE contas(id INTEGER PRIMARY KEY)')

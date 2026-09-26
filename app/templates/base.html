@@ -9,16 +9,22 @@
 </head>
 <body>
 <header><nav class="container nav-wrap" aria-label="Navegação principal">
-  <a class="brand" href="{{ url_for('main.index') }}">Meu Caixa<span>FINANÇAS PESSOAIS</span></a>
+  <a class="brand" href="{{ url_for('main.menu') }}">Meu Espaço<span>FINANÇAS & ALIMENTAÇÃO</span></a>
   <div class="nav-links">
+  <a href="{{ url_for('main.menu') }}">Sistemas</a>
+  {% if g.user %}
   {% for endpoint,label in [('index','Visão geral'),('extrato','Extrato'),('faturas','Faturas'),('recebiveis','Responsáveis'),('cadastros','Cadastros')] %}
     <a class="{{ 'active' if request.endpoint == 'main.'+endpoint else '' }}" href="{{ url_for('main.'+endpoint) }}">{{ label }}</a>
   {% endfor %}
+  {% if g.user.is_admin %}<a href="{{ url_for('auth.usuarios') }}">Usuários</a>{% endif %}
+  <a href="{{ url_for('auth.perfil') }}">{{ g.user.nome }}</a>
+  <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"><button class="logout-button">Sair</button></form>
+  {% else %}<a href="{{ url_for('auth.login') }}">Entrar</a>{% endif %}
   </div>
 </nav></header>
 <main class="container py-4 py-md-5">
 {% for category,message in get_flashed_messages(with_categories=true) %}<div role="status" class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}
 {% block content %}{% endblock %}
 </main>
-<footer class="container pb-4">Meu Caixa · Valores em reais · Uso pessoal local</footer>
+<footer class="container pb-4">Meu Espaço · Organização pessoal e familiar</footer>
 </body></html>

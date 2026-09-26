@@ -20,3 +20,4 @@ instance/
 *.db-wal
 *.db-shm
 backups/
+referencias/

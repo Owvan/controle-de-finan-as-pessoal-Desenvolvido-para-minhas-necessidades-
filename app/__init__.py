@@ -1,6 +1,7 @@
 import os
 import secrets
-from datetime import date
+from urllib.parse import urlsplit
+from datetime import date, timedelta
 from pathlib import Path
 import click
 from flask import Flask, abort, request, session
@@ -12,10 +13,17 @@ def create_app(test_config=None):
         DATABASE=str(DATABASE), SECRET_KEY=os.environ.get('SECRET_KEY'),
         MAX_CONTENT_LENGTH=256 * 1024, SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax', SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE') == '1',
-        TRUSTED_HOSTS=['localhost', '127.0.0.1', '[::1]'],
+        TRUSTED_HOSTS=[host.strip() for host in os.environ.get('TRUSTED_HOSTS', 'localhost,127.0.0.1,[::1]').split(',') if host.strip()],
+        ALLOW_INITIAL_SETUP=os.environ.get('APP_ENV') != 'production',
+        NUTRITION_URL=os.environ.get('NUTRITION_URL', '').strip(),
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
     )
     if test_config:
         app.config.update(test_config)
+    if app.config['NUTRITION_URL']:
+        destino = urlsplit(app.config['NUTRITION_URL'])
+        if destino.scheme != 'https' or not destino.hostname or destino.username or destino.password:
+            raise RuntimeError('NUTRITION_URL deve ser um endereço HTTPS completo, sem credenciais.')
     if not app.config['SECRET_KEY']:
         if os.environ.get('APP_ENV') == 'production':
             raise RuntimeError('Configure SECRET_KEY antes de executar em produção.')
@@ -30,6 +38,9 @@ def create_app(test_config=None):
         if not app.config['SECRET_KEY']:
             raise RuntimeError('A chave local está vazia.')
     app.teardown_appcontext(close_db)
+    from app.auth.routes import bp as auth_bp, carregar_usuario
+    app.register_blueprint(auth_bp)
+    app.before_request(carregar_usuario)
 
     @app.before_request
     def csrf_protection():
@@ -44,6 +55,8 @@ def create_app(test_config=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['Referrer-Policy'] = 'same-origin'
+        if request.endpoint != 'static':
+            response.headers['Cache-Control'] = 'no-store'
         response.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; script-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         return response
 
@@ -63,6 +76,23 @@ def create_app(test_config=None):
     @app.cli.command('init-db')
     def init_db_command():
         click.echo(f'Banco inicializado: {init_db()}')
+
+    @app.cli.command('create-admin')
+    @click.option('--nome', prompt='Nome')
+    @click.option('--username', prompt='Usuário')
+    @click.option('--email', prompt='E-mail')
+    @click.password_option(prompt='Senha', confirmation_prompt='Confirme a senha')
+    def create_admin_command(nome, username, email, password):
+        """Cria apenas o primeiro administrador, sem senha padrão."""
+        from app.auth.services import criar_usuario
+        from app.criar_db import get_db
+        from app.services import RegraFinanceira
+        init_db()
+        try:
+            criar_usuario(get_db(), nome, username, email, password, primeiro=True)
+        except RegraFinanceira as exc:
+            raise click.ClickException(str(exc)) from exc
+        click.echo('Administrador criado. Entre com suas credenciais.')
 
     @app.cli.command('backup-db')
     @click.argument('destino', type=click.Path(path_type=Path))

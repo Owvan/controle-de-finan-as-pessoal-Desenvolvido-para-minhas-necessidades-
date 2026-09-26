@@ -9,6 +9,7 @@ DATABASE = ROOT / 'instance' / 'financeiro.db'
 def conectar(path):
     db = sqlite3.connect(str(path), timeout=10, isolation_level=None)
     db.row_factory = sqlite3.Row
+    db.create_function('current_actor', 0, lambda: 'local')
     db.execute('PRAGMA foreign_keys = ON')
     db.execute('PRAGMA busy_timeout = 10000')
     db.execute('PRAGMA synchronous = FULL')
@@ -17,6 +18,7 @@ def conectar(path):
 def get_db():
     if 'db' not in g:
         g.db = conectar(current_app.config['DATABASE'])
+        g.db.create_function('current_actor', 0, lambda: f"usuario:{g.user['id']}" if getattr(g, 'user', None) else 'local')
     return g.db
 
 def close_db(error=None):
@@ -33,12 +35,14 @@ def criar_database(path=None):
         tables = db.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         if version == 0 and tables:
             raise RuntimeError('Banco sem versão ou com esquema antigo. Faça backup e migração explícita; nenhum dado foi modificado.')
-        if version > 1:
+        if version > 2:
             raise RuntimeError('Versão do banco mais recente que esta aplicação.')
-        if version == 0:
-            schema = (Path(__file__).parent / 'migrations' / '001_initial.sql').read_text(encoding='utf-8')
+        for numero, arquivo in [(1, '001_initial.sql'), (2, '002_users.sql')]:
+            if numero <= version:
+                continue
+            schema = (Path(__file__).parent / 'migrations' / arquivo).read_text(encoding='utf-8')
             try:
-                db.executescript('BEGIN IMMEDIATE;\n' + schema + '\nPRAGMA user_version = 1;\nCOMMIT;')
+                db.executescript('BEGIN IMMEDIATE;\n' + schema + f'\nPRAGMA user_version = {numero};\nCOMMIT;')
             except Exception:
                 if db.in_transaction:
                     db.rollback()

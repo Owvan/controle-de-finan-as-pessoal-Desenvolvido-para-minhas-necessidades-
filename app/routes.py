@@ -1,7 +1,7 @@
 import csv
 import io
 from functools import wraps
-from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, current_app, flash, redirect, render_template, request, url_for
 from app.criar_db import get_db
 from app import services as s
 
@@ -45,6 +45,10 @@ def rateios_form():
     return result
 
 @bp.get('/')
+def menu():
+    return render_template('menu.html', nutrition_url=current_app.config['NUTRITION_URL'])
+
+@bp.get('/financeiro')
 def index():
     db = get_db()
     dados = listas()
