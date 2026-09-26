@@ -101,6 +101,6 @@ Centros de custo foram retirados dos cadastros, formulários e exportações. Os
 
 ## Menu dos sistemas
 
-A página `/` é pública e permite escolher o controle financeiro ou o alimentar, sem exibir valores ou dados pessoais. O painel financeiro fica em `/financeiro` e exige login. Configure `NUTRITION_URL` com o endereço HTTPS do controle alimentar existente. Sem configuração, o botão alimentar fica indisponível. O menu não inicia nem hospeda a aplicação alimentar: ela continua em seu próprio endereço, banco e login.
+A página `/` é pública e permite escolher o controle financeiro ou o alimentar, sem exibir valores ou dados pessoais. O painel financeiro fica em `/financeiro` e exige login. O botão alimentar aponta para `https://owvan.pythonanywhere.com/login`. Para alterar o destino, configure `NUTRITION_URL` com outro endereço HTTPS. Sem configuração, o botão alimentar fica indisponível. O menu não inicia nem hospeda a aplicação alimentar: ela continua em seu próprio endereço, banco e login.
 
 Para publicar a nova aplicação financeira, consulte [DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md). O código é distribuído sem banco pessoal: `init-db` cria as tabelas e as categorias padrão; em produção, `create-admin` cria o primeiro acesso pelo console.

@@ -13,7 +13,7 @@ class AuthTest(unittest.TestCase):
         self.path = self.folder / 'auth.db'
         criar_database(self.path)
         self.db = conectar(self.path)
-        self.app = create_app({'TESTING':True,'DATABASE':str(self.path),'SECRET_KEY':'test-auth-secret'})
+        self.app = create_app({'TESTING':True,'DATABASE':str(self.path),'SECRET_KEY':'test-auth-secret','NUTRITION_URL':''})
         self.client = self.app.test_client()
 
     def tearDown(self):

@@ -15,7 +15,7 @@ def create_app(test_config=None):
         SESSION_COOKIE_SAMESITE='Lax', SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE') == '1',
         TRUSTED_HOSTS=[host.strip() for host in os.environ.get('TRUSTED_HOSTS', 'localhost,127.0.0.1,[::1]').split(',') if host.strip()],
         ALLOW_INITIAL_SETUP=os.environ.get('APP_ENV') != 'production',
-        NUTRITION_URL=os.environ.get('NUTRITION_URL', '').strip(),
+        NUTRITION_URL=os.environ.get('NUTRITION_URL', 'https://owvan.pythonanywhere.com/login').strip(),
         PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
     )
     if test_config:

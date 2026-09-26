@@ -53,7 +53,7 @@ sys.path.insert(0, str(project))
 os.environ['APP_ENV'] = 'production'
 os.environ['COOKIE_SECURE'] = '1'
 os.environ['TRUSTED_HOSTS'] = 'SEU_USUARIO.pythonanywhere.com'
-os.environ['NUTRITION_URL'] = 'https://DOMINIO_DO_CONTROLE_ALIMENTAR'
+os.environ['NUTRITION_URL'] = 'https://owvan.pythonanywhere.com/login'
 os.environ['SECRET_KEY'] = (project / 'instance' / 'production.key').read_text().strip()
 
 from app import create_app
